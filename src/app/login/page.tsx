@@ -3,6 +3,7 @@
 import { useForm } from 'react-hook-form'
 import axios from 'axios';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation'
 
 type FormData = {
   email: string;
@@ -10,16 +11,27 @@ type FormData = {
 };
 
 export default function Home() {
-  const { register, handleSubmit, formState: { errors }, reset } = useForm<FormData>();
-  const onSubmit = ((data: any) => {
-    data.preventDefault();
-    axios.post("http://localhost:8080/auth/register", {
+  const { register, handleSubmit, formState: { errors }, reset, watch, setError } = useForm<FormData>();
+  const router = useRouter()
+  const onSubmit = ((data: FormData, e: any) => {
+    e.preventDefault();
+    axios.post("http://localhost:8080/auth/login", {
       email: data.email,
       password: data.password
     }).then(res => {
-      console.log("Signing in", res);
+      console.log("Logging in", res);
+      alert('Log in successful')
+      router.push('/home');
     }).catch(err => {
       console.log(err);
+      setError("email", {
+        type: "manual",
+        message: "invalid login credentials"
+      })
+      setError("password", {
+        type: "manual",
+        message: "invalid login credentials"
+      })
     })
     reset();
   });
@@ -66,7 +78,7 @@ export default function Home() {
             </label>
             {errors.password && <span role="alert" className='text-sm text-red-500'>{errors.password.message}</span>}
           </div>
-          <button type="submit" className="bg-white hover:bg-gray-200 text-black font-bold py-2 px-4 rounded-full mb-4">SIGN UP</button>
+          <button type="submit" className="bg-white hover:bg-gray-200 text-black font-bold py-2 px-4 rounded-full mb-4">LOG IN</button>
         </form>
         <p className={`m-0 text-sm text-gray-600`}>
           Don't have an account? <Link href="/signup" className='text-blue-400 hover:underline'>Sign up</Link>

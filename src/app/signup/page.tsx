@@ -3,6 +3,8 @@
 import { useForm } from 'react-hook-form'
 import axios from 'axios';
 import Link from 'next/link';
+import { useState } from 'react';
+import { useRouter } from 'next/navigation'
 
 type FormData = {
   email: string;
@@ -11,16 +13,23 @@ type FormData = {
 };
 
 export default function Home() {
-  const { register, handleSubmit, formState: { errors }, reset, watch } = useForm<FormData>();
-  const onSubmit = ((data: any) => {
-    data.preventDefault();
+  const { register, handleSubmit, formState: { errors }, reset, watch, setError } = useForm<FormData>();
+  const router = useRouter()
+  const onSubmit = ((data: FormData, e: any) => {
+    e.preventDefault();
     axios.post("http://localhost:8080/auth/register", {
       email: data.email,
       password: data.password
     }).then(res => {
       console.log("Signing in", res);
+      alert('Sign in successful')
+      router.push('/home');
     }).catch(err => {
       console.log(err);
+      setError("email", {
+        type: "manual",
+        message: "email already in use"
+      })
     })
     reset();
   });
@@ -79,7 +88,7 @@ export default function Home() {
                   }
                 }
               })}
-              type="confirm_password"
+              type="password"
             />
             <label htmlFor="confirm_password" className={`peer-focus:font-medium absolute text-sm text-gray-500 dark:text-gray-400 duration-300 transform -translate-y-6 scale-75 top-3 -z-10 origin-[0] peer-focus:left-0 ${ errors.confirm_password ? `peer-focus:text-red-600 peer-focus:dark:text-red-500` : `peer-focus:text-blue-600 peer-focus:dark:text-blue-500` } peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-6`}>
               confirm password
